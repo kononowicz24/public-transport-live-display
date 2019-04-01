@@ -44,7 +44,6 @@ void setup() {
   Serial1.println("Connecting to ");
   //setCursor(0,1);
   //Serial1.println(ssid);
-  ESP.wdtFeed();
   Serial1.println(ssid);
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
@@ -111,7 +110,7 @@ void loop() {
   }
 
   const size_t bufferSize = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(3) + 5*JSON_OBJECT_SIZE(12) + 1120;
-  //DynamicJsonBuffer jsonBuffer(bufferSize);
+  DynamicJsonBuffer jsonBuffer(bufferSize);
   //DynamicJsonDocument ;
   // Read all the lines of the reply from server and print them to Serial
   while(client.available()){
