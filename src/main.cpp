@@ -2,48 +2,24 @@
 
 #include <ArduinoJson.h>
 
-#include <SoftwareSerial.h>
+#include "vfdinterface.hpp"
 
-#include <Wire.h>
-//#include <LiquidCrystal_I2C.h>
+#include "passwords.h"
 
-const char* ssid     = "UPC247602010";
-const char* password = "HFLAZPSY";
+const char* ssid     = SSID;
+const char* password = PASSWORD;
 
 const char* host = "87.98.237.99";
-const char* stopId = "1331";
-
-//LiquidCrystal_I2C Serial1(0x27, 16, 2);
-//SoftwareSerial Serial1(D3,D4);
-
-void setCursor(int x, int y) {
-  char buf1[5];
-  itoa(y+1, buf1, 10);
-  char buf2[5];
-  itoa(x+1, buf2, 10);
-  Serial1.print((String)""+(char)27+"["+buf1+";"+buf2+"H");
-}
-
-void clear() {
-  Serial1.print((String)""+(char)27+"[2J");
-}
-
+const char* stopId = "1331";//todo: make it selectable
 
 void setup() {
   Serial.begin(115200);
   delay(10);
-
-
   // We start by connecting to a WiFi network
   Serial1.begin(9600);
   clear();
   setCursor(0,0);
-  //Serial1.setBacklight(50);
-  //Serial.println();
-  //Serial.println();
   Serial1.println("Connecting to ");
-  //setCursor(0,1);
-  //Serial1.println(ssid);
   Serial1.println(ssid);
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
@@ -56,7 +32,6 @@ void setup() {
   setCursor(0,2);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial1.print(".");
