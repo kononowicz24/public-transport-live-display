@@ -1,4 +1,4 @@
-#include "vfdinterface.hpp"
+#include "VFDInterface.hpp"
 #include <cstdlib>
 
 void setCursor(int x, int y) {
