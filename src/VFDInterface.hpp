@@ -5,5 +5,6 @@
 
 void setCursor(int x, int y);
 void clear();
+void clearLine(int line);
 
 #endif

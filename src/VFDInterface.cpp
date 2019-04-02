@@ -12,3 +12,8 @@ void setCursor(int x, int y) {
 void clear() {
   Serial1.print((String)""+(char)27+"[2J");
 }
+
+void clearLine(int line) {
+  setCursor(0, line);
+  Serial1.print((String)""+(char)27+"[0K");
+}
