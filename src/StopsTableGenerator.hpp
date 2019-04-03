@@ -34,8 +34,7 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
 
   const size_t bufferSize = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(3) + 5*JSON_OBJECT_SIZE(12) + 1120;
   DynamicJsonBuffer jsonBuffer(bufferSize);
-  //DynamicJsonDocument ;
-  // Read all the lines of the reply from server and print them to Serial
+
   while(client.available()){
       JsonObject& root = jsonBuffer.parseObject(client);
 
@@ -65,6 +64,7 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
         }
       }
   }
+  client.stop();
   return true;
 }
 

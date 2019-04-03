@@ -14,16 +14,14 @@ const char* password = PASSWORD;
 
 const char* stopId = "1331";//todo: make it selectable
 
-#define STOPSREFRESHMILLIS 20000
-#define WEATHERREFRESHMILLIS 1200000
+#define STOPSREFRESHMILLIS 20000 //each 20sec
+#define WEATHERREFRESHMILLIS 1200000 //each 20min
 
-long long stopsLastMillis = -20000;
-long long weatherLastMillis = -1200000;
+long long stopsLastMillis = -1*STOPSREFRESHMILLIS;
+long long weatherLastMillis = -1*WEATHERREFRESHMILLIS;
 
 void setup() {
-  Serial.begin(115200);
-  delay(10);
-  // We start by connecting to a WiFi network
+  Serial.begin(115200); //debug one
   Serial1.begin(9600); //this one setups communication with the vfd display
   clear();
   setCursor(0,0);
@@ -49,12 +47,10 @@ void setup() {
   //delay(1000);
 }
 
-int value = 0;
-
 void loop() {
   //if (value>0) delay(20000); else delay(3000);//FIXME
   //++value;
-
+  //delay(1);
   //Serial.print(debug()+"connecting to ");
   //Serial.println(host);
   if (millis()>stopsLastMillis+STOPSREFRESHMILLIS) {
@@ -63,17 +59,17 @@ void loop() {
        stopsLastMillis = millis();
        Serial.println(debug()+" Delays up to date");
      }
-     else stopsLastMillis+=2000;//wait for 20s to connect again
+     else stopsLastMillis+=10000;//wait for 10s to connect again
   }
-  //todo maybe other cities
   if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) {
     Serial.println(debug()+" Trying to refresh weather");
      if (showWeatherline("api.openweathermap.org", 80, "7531002")) { //todo maybe change city?
        weatherLastMillis = millis();
        Serial.println(debug()+" Weather up to date");
      }
-     else weatherLastMillis+=20000; //wait for 20s to connect again
+     weatherLastMillis+=200000; //wait for 200s to connect again
   }
   //todo weather only once in 20min
   //Serial.println(debug()+"closing connection");
+
 }
