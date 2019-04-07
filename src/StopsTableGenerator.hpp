@@ -5,6 +5,7 @@
 #include "VFDInterface.hpp"
 
 boolean showStopDelayList(const char* host, int httpPort, String stopId) {
+    boolean printedLines[] = {false, false, false};
     WiFiClient client;
     //const int httpPort = 88;
     if (!client.connect(host, httpPort)) {
@@ -44,6 +45,7 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
         int delayInSeconds = delay0["delayInSeconds"];
         String estimatedTime = delay0["estimatedTime"];
         String theoreticalTime = delay0["theoreticalTime"];
+        String relation = delay0["headsign"];
         String delStr = "";
         if (routeId!=0) {
           clearLine(i);
@@ -56,13 +58,19 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
           delStr = (String)delayInSeconds;
 
           setCursor(4,i);
-          Serial1.print("(");
-          setCursor(9-delStr.length(),i);
-          Serial1.print(delStr+")");
-          setCursor(11,i);
+          String relation1= toCP852(relation);
+          Serial1.print(relation1);
+          //Serial1.print("(");
+          setCursor(13-delStr.length(),i);
+          Serial1.print((String)" "+ delStr+" ");
+          setCursor(15,i);
           Serial1.print((String)estimatedTime);
+          printedLines[i] = true;
         }
       }
+  }
+  for (int i=0; i<3; i++) {
+    if (!printedLines[i]) clearLine(i);
   }
   client.stop();
   return true;

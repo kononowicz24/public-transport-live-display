@@ -41,6 +41,7 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   float wind_speed;
   int temp;
   int wind;
+  const char* description;
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(6) + JSON_OBJECT_SIZE(12) + 400;
   DynamicJsonBuffer jsonBuffer(capacity);
   while (client.available()) {
@@ -53,10 +54,12 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
     temp = (int)( main_temp - 273.15);
     wind_speed = root["wind"]["speed"]; // 10.3
     wind = (int)(wind_speed*3.6);
+    description = root["weather"][0]["description"];
   }
   client.stop();
-  setCursor(6,3);
-  Serial1.print((String)""+(String)temp+"dC "+(String)wind+"km/h ");
+  clearLine(4);
+  setCursor(0,3);
+  Serial1.print((String)""+(String)temp+(char)248+"C "+(String)wind+"km/h "+(String)description);
   return true;
 }
 

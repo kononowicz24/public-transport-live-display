@@ -17,14 +17,18 @@ const char* stopId = "1331";//todo: make it selectable
 #define STOPSREFRESHMILLIS 20000 //each 20sec
 #define WEATHERREFRESHMILLIS 1200000 //each 20min
 
-long long stopsLastMillis = -1*STOPSREFRESHMILLIS;
-long long weatherLastMillis = -1*WEATHERREFRESHMILLIS;
+long long stopsLastMillis = -1*STOPSREFRESHMILLIS; //so that both weather and
+long long weatherLastMillis = -1*WEATHERREFRESHMILLIS; //stops refresh immediately
 
 void setup() {
   Serial.begin(115200); //debug one
   Serial1.begin(9600); //this one setups communication with the vfd display
+  setCodePage();
   clear();
+  //demo();
+  delay(500);
   setCursor(0,0);
+
   Serial1.println("Connecting to ");
   Serial1.println(ssid);
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
@@ -69,7 +73,5 @@ void loop() {
      }
      weatherLastMillis+=200000; //wait for 200s to connect again
   }
-  //todo weather only once in 20min
-  //Serial.println(debug()+"closing connection");
 
 }
