@@ -11,7 +11,7 @@ void setCodePage();
 String toCP852(String string);
 
 const String CP852[] = {String((char)164), String((char)143), String((char)168), //todo refactor
-                        String((char)157), String((char)227), String((char)224),
+                        String((char)157), String((char)227), String((char)224), //maybe store in SPIFFS?
                         String((char)151), String((char)141), String((char)189),
                         String((char)165), String((char)134), String((char)169),
                         String((char)136), String((char)228), String((char)162),
