@@ -59,7 +59,8 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   client.stop();
   clearLine(4);
   setCursor(0,3);
-  Serial1.print((String)""+(String)temp+(char)248+"C "+(String)wind+"km/h "+(String)description);
+  Serial1.print((String)""+(String)temp+(char)248+"C "+(String)wind+"km/h "+(String)description); // ascii - 248 
+  Serial.print((String)""+(String)temp+(char)176+"C "+(String)wind+"km/h "+(String)description); //win - 176, ciekawe co linuks ehhh
   return true;
 }
 

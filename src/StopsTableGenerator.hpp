@@ -9,7 +9,7 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
     WiFiClient client;
     //const int httpPort = 88;
     if (!client.connect(host, httpPort)) {
-      Serial1.println("connection failed");
+      Serial.println("connection failed");
       return false;
     }
     // We now create a URI for the request
@@ -36,6 +36,8 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
   const size_t bufferSize = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(3) + 5*JSON_OBJECT_SIZE(12) + 1120;
   DynamicJsonBuffer jsonBuffer(bufferSize);
 
+  
+
   while(client.available()){
       JsonObject& root = jsonBuffer.parseObject(client);
 
@@ -54,17 +56,17 @@ boolean showStopDelayList(const char* host, int httpPort, String stopId) {
           //Serial.println(estimatedTime);
           //prevDel = (String)delay0_routeId+" ("+delay0_delayInSeconds+") "+delay0_estimatedTime;
           setCursor(0,i);
-          Serial1.print((String)routeId);
+          Serial.print((String)routeId);
           delStr = (String)delayInSeconds;
 
           setCursor(4,i);
           String relation1= toCP852(relation);
-          Serial1.print(relation1);
+          Serial.print(relation1);
           //Serial1.print("(");
           setCursor(13-delStr.length(),i);
-          Serial1.print((String)" "+ delStr+" ");
+          Serial.print((String)" "+ delStr+" ");
           setCursor(15,i);
-          Serial1.print((String)estimatedTime);
+          Serial.print((String)estimatedTime);
           printedLines[i] = true;
         }
       }
