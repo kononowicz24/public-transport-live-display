@@ -1,4 +1,6 @@
 #include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include "NTPClient.h"
 
 #include <ArduinoJson.h>
 
@@ -14,7 +16,8 @@
 #include <Wire.h>
 #include "SparkFun_TCA9534.h"
 #include "SHT31.h"
-#include "Adafruit_SI1145.h"
+#include "MAX44009.h"
+#include "FastLED.h"
 
 #include "i2cscan.hpp"
 
@@ -25,11 +28,14 @@ const char* stopId = "1331";//todo: make it selectable
 
 #define STOPSREFRESHMILLIS 20000 //each 20sec
 #define WEATHERREFRESHMILLIS 1200000 //each 20min
+#define TIMEREFRESHMILLIS 1000 //each 1sec
 
 uint8_t leds_config = 0;
 
 long long stopsLastMillis = -1*STOPSREFRESHMILLIS; //so that both weather and
 long long weatherLastMillis = -1*WEATHERREFRESHMILLIS; //stops refresh immediately
+long long timeLastMillis = -1*TIMEREFRESHMILLIS; //stops refresh immediately
+int utcOffsetInSeconds = 2 * 60 * 60;
 /*
  Now we need a LedControl to work with.
  ***** These pin numbers will probably not work with your hardware *****
@@ -38,11 +44,17 @@ long long weatherLastMillis = -1*WEATHERREFRESHMILLIS; //stops refresh immediate
  pin 10 is connected to LOAD 
  We have only a single MAX72XX.
  */
+#define NUM_LEDS 7
+#define LED_PIN 16
 
 LedControl_HW_SPI segment = LedControl_HW_SPI(); 
 TCA9534 expander;
 SHT31 sht;
-Adafruit_SI1145 uv;
+MAX44009 light;
+CRGB led_strip[NUM_LEDS];
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
 void setup() {
   Serial.begin(115200); //debug one
@@ -59,8 +71,8 @@ void setup() {
   expander.writeRegister(REGISTER_OUTPUT_PORT, 0);
 
   sht.begin(0x44);
-
-  uv.begin(0x60);
+  light.begin();
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(led_strip, NUM_LEDS);
 
   //digitalWrite(15,HIGH);
   pinMode(16,OUTPUT);
@@ -97,6 +109,8 @@ void setup() {
   //Serial.println("IP address: ");
   Serial.print(WiFi.localIP());
 
+  timeClient.begin();
+
 }
 
 void loop() {
@@ -118,8 +132,8 @@ void loop() {
      //Serial.println("tick "+leds_config);
      stopsLastMillis+=1000;
      sht.read(false);
-     Serial1.println("T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" tick: "+ leds_config);
-     Serial.println("LIGHT: "+(String)(uv.readVisible()-256)+" IR: "+ (uv.readIR()-256)+" PROX: "+(uv.readProx()-256)+" UV: "+uv.readUV());
+     Serial.println(debug()+"T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" tick: "+ leds_config);
+     Serial.println(debug()+"Light: "+(String)light.get_lux());
   }
   if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) {
     Serial.println(debug()+" Trying to refresh weather");
@@ -129,5 +143,28 @@ void loop() {
      }
      weatherLastMillis+=200000; //wait for 200s to connect again
   }
+  if (millis()>timeLastMillis+TIMEREFRESHMILLIS) {
+      if (timeClient.update()) {
+        int hr = timeClient.getHours();
+        int mn = timeClient.getMinutes();
+        segment.setDigit(0,0,hr/10,false);
+        segment.setDigit(0,1,hr%10,false);
+        segment.setDigit(0,2,mn/10,false);
+        segment.setDigit(0,3,mn%10,false);
+      } else {} // tutaj czerwonym ledem że czas nieaktualny
+      timeLastMillis+=1000;
+  }
+
+  //rbg
+
+  led_strip[0] = CRGB(255,255,255);
+  led_strip[1] = CRGB(0,0,0);
+  led_strip[2] = CRGB(0,0,255);
+  led_strip[3] = CRGB(0,255,0);
+  led_strip[4] = CRGB(255,0,0);
+  led_strip[5] = CRGB(255,255,0);
+  led_strip[6] = CRGB(255,0,255);
+  FastLED.show();
+  delay(500);
 
 }
