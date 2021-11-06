@@ -8,9 +8,18 @@
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include "weather.h"
+#include <cmath>
+
+const String caridnals[] = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N" };
 
 Weather weather;
 //https://api.openweathermap.org/data/2.5/weather?id=7531002&APPID=
+
+String degreesToCardinalDetailed(int16_t degrees)
+{
+    degrees *= 10;
+    return caridnals[(int)round((degrees % 3600) / 225.0f)];
+}
 
 boolean showWeatherline(const char* host, int httpPort, String cityId) {
   WiFiClient client;
@@ -23,7 +32,7 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   String url = "/data/2.5/weather";
   url += "?id=";
   url += cityId;
-  url += "&APPID=";
+  url += "&lang=pl&APPID=";
   url += WEATHERAPIKEY_k24;
 
   Serial.print("Requesting URL: ");
@@ -44,6 +53,7 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   }
   float main_temp;
   float main_wind_speed;
+  uint16_t main_wind_direction;
   const char* main_description;
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(6) + JSON_OBJECT_SIZE(12) + 400;
   DynamicJsonBuffer jsonBuffer(capacity);
@@ -52,11 +62,16 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
     JsonObject& root = jsonBuffer.parseObject(client);
     //JsonObject& weather_0 = root["weather"][0];
     JsonObject& main = root["main"];
+
     main_temp = main["temp"]; // 284.7
-    //Serial.println(main_temp);
     weather.temp_degC = (int)( main_temp - 273.15);
+
     main_wind_speed = root["wind"]["speed"]; // 10.3
     weather.wind_speed = (int)(main_wind_speed*3.6);
+
+    main_wind_direction = root["wind"]["deg"]; // 10.3
+    weather.wind_direction = (int)(main_wind_direction);
+
     main_description = root["weather"][0]["description"];
     weather.description = String(main_description);
   }
@@ -64,9 +79,9 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
 
   clearLine(4);
   setCursor(0,2);
-  Serial1.print((String)""+(String)weather.temp_degC+(char)248+"C "+(String)weather.wind_speed+"km/h "+(String)weather.wind_direction); // ascii - 248 
+  Serial1.print((String)""+(String)weather.temp_degC+(char)248+"C "+(String)weather.wind_speed+"km/h "+degreesToCardinalDetailed(weather.wind_direction)); // ascii - 248 
   setCursor(0,3);
-  Serial1.print((String)""+(String)weather.description); // ascii - 248 
+  Serial1.print((String)""+(String)toCP852(weather.description)); // ascii - 248 
   //Serial.print((String)""+(String)temp+(char)176+"C "+(String)wind+"km/h "+(String)description); //win - 176, ciekawe co linuks ehhh
 
   return true;
