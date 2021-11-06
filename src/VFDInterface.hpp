@@ -2,13 +2,16 @@
 #define _VFDINTERFACE_H_
 #include "HardwareSerial.h"
 #include "Arduino.h"
+#include "weather.h"
 
+struct Weather;
 void setCursor(int x, int y);
 void clear();
 void clearLine(int line);
 void demo();
 void setCodePage();
 String toCP852(String string);
+void VFD_showWeather(Weather weather);
 
 const String CP852[] = {String((char)164), String((char)143), String((char)168), //todo refactor
                         String((char)157), String((char)227), String((char)224),

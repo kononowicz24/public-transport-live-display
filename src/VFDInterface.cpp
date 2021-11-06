@@ -1,4 +1,5 @@
 #include "VFDInterface.hpp"
+//#include "WeatherGenerator.hpp"
 #include <cstdlib>
 
 void setCursor(int x, int y) {
@@ -44,4 +45,13 @@ String toCP852(String string) {
     result.replace(UTF8[i], CP852[i]);
   }
   return result;
+}
+
+void showWeather(Weather weather) {
+  clearLine(4);
+  setCursor(0,2);
+  Serial1.print((String)""+(String)weather.temp_degC+(char)248+"C "+(String)weather.wind_speed+"km/h "+(String)weather.wind_direction); // ascii - 248 
+  setCursor(0,3);
+  Serial1.print((String)""+(String)weather.description); // ascii - 248 
+  //Serial.print((String)""+(String)temp+(char)176+"C "+(String)wind+"km/h "+(String)description); //win - 176, ciekawe co linuks ehhh
 }

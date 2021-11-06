@@ -2,9 +2,14 @@
 #define _WEATHER_GENERATOR_H_
 #include "VFDInterface.hpp"
 #include "Arduino.h"
-#include "passwords.h"
-#include "VFDInterface.hpp"
 
+#include "passwords.h"
+
+#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
+#include "weather.h"
+
+Weather weather;
 //https://api.openweathermap.org/data/2.5/weather?id=7531002&APPID=
 
 boolean showWeatherline(const char* host, int httpPort, String cityId) {
@@ -19,7 +24,7 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   url += "?id=";
   url += cityId;
   url += "&APPID=";
-  url += WEATHERAPIKEY;
+  url += WEATHERAPIKEY_k24;
 
   Serial.print("Requesting URL: ");
   Serial.println(url);
@@ -38,10 +43,8 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
     }
   }
   float main_temp;
-  float wind_speed;
-  int temp;
-  int wind;
-  const char* description;
+  float main_wind_speed;
+  const char* main_description;
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(6) + JSON_OBJECT_SIZE(12) + 400;
   DynamicJsonBuffer jsonBuffer(capacity);
   while (client.available()) {
@@ -51,17 +54,33 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
     JsonObject& main = root["main"];
     main_temp = main["temp"]; // 284.7
     //Serial.println(main_temp);
-    temp = (int)( main_temp - 273.15);
-    wind_speed = root["wind"]["speed"]; // 10.3
-    wind = (int)(wind_speed*3.6);
-    description = root["weather"][0]["description"];
+    weather.temp_degC = (int)( main_temp - 273.15);
+    main_wind_speed = root["wind"]["speed"]; // 10.3
+    weather.wind_speed = (int)(main_wind_speed*3.6);
+    main_description = root["weather"][0]["description"];
+    weather.description = String(main_description);
   }
   client.stop();
+
   clearLine(4);
+  setCursor(0,2);
+  Serial1.print((String)""+(String)weather.temp_degC+(char)248+"C "+(String)weather.wind_speed+"km/h "+(String)weather.wind_direction); // ascii - 248 
   setCursor(0,3);
-  Serial1.print((String)""+(String)temp+(char)248+"C "+(String)wind+"km/h "+(String)description); // ascii - 248 
-  Serial.print((String)""+(String)temp+(char)176+"C "+(String)wind+"km/h "+(String)description); //win - 176, ciekawe co linuks ehhh
+  Serial1.print((String)""+(String)weather.description); // ascii - 248 
+  //Serial.print((String)""+(String)temp+(char)176+"C "+(String)wind+"km/h "+(String)description); //win - 176, ciekawe co linuks ehhh
+
   return true;
+}
+
+boolean showWeather() {
+  if (showWeatherline("api.openweathermap.org", 80, "7531002")) { //todo maybe change city?
+    //if (VFD_on) {
+      VFD_showWeather(weather);
+    //}
+    return true;
+  } else {
+    return false;
+  }
 }
 
 #endif

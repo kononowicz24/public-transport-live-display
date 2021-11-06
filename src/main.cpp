@@ -9,6 +9,7 @@
 #include "WeatherGenerator.hpp"
 #include "debugInterface.hpp"
 
+
 #include "passwords.h"
 
 #include "LedControl_HW_SPI.h"
@@ -21,21 +22,24 @@
 
 #include "i2cscan.hpp"
 
-const char* ssid     = SSID;
-const char* password = PASSWORD;
+const char* ssid     = SSID_k24;
+const char* password = PASSWORD_k24;
 
 const char* stopId = "1331";//todo: make it selectable
 
 #define STOPSREFRESHMILLIS 20000 //each 20sec
 #define WEATHERREFRESHMILLIS 1200000 //each 20min
 #define TIMEREFRESHMILLIS 1000 //each 1sec
+#define LEDSREFRESHMILLIS 10000
 
 uint8_t leds_config = 0;
 
 long long stopsLastMillis = -1*STOPSREFRESHMILLIS; //so that both weather and
 long long weatherLastMillis = -1*WEATHERREFRESHMILLIS; //stops refresh immediately
 long long timeLastMillis = -1*TIMEREFRESHMILLIS; //stops refresh immediately
-int utcOffsetInSeconds = 2 * 60 * 60;
+long long ledsLastMillis = -1*LEDSREFRESHMILLIS;
+
+int utcOffsetInSeconds = 1 * 60 * 60;
 /*
  Now we need a LedControl to work with.
  ***** These pin numbers will probably not work with your hardware *****
@@ -56,6 +60,24 @@ CRGB led_strip[NUM_LEDS];
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
+#define LEDS_CONFIG_LEFT_GREEN 0x02
+#define LEDS_CONFIG_OFF 0x00
+#define LEDS_CONFIG_LEFT_RED 0x04
+
+#define LEDS_ON_MASK 0x38
+#define LEDS_OFF_MASK 0x00
+#define VFD_ON_MASK 0x80
+#define VFD_OFF_MASK 0x00
+#define VFD_ON 0x80
+
+uint8_t leds_on_status = 0x38;
+uint8_t leds_status = 0x00;
+
+uint8_t vfd_on_status = 0x80;
+uint8_t vfd_status = VFD_ON;
+
+uint8_t expander_status = 0x00;
+
 void setup() {
   Serial.begin(115200); //debug one
   Serial1.begin(9600); //this one setups communication with the vfd display
@@ -67,8 +89,8 @@ void setup() {
   setCursor(0,0);
 
   expander.begin(Wire, 0x3f);
-  expander.writeRegister(REGISTER_CONFIGURATION, 0xc0);
-  expander.writeRegister(REGISTER_OUTPUT_PORT, 0);
+  expander.writeRegister(REGISTER_CONFIGURATION, 0x40);
+  expander.writeRegister(REGISTER_OUTPUT_PORT, leds_status+vfd_status);
 
   sht.begin(0x44);
   light.begin();
@@ -88,8 +110,8 @@ void setup() {
   segment.setDigit(0,2,8,false);
   segment.setDigit(0,3,8,false);
 
-  Serial1.println("Connecting to ");
-  Serial1.println(ssid);
+  Serial.println("Connecting to ");
+  Serial.println(ssid);
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
      network-issues with your other WiFi-devices on your WiFi-network. */
@@ -102,12 +124,11 @@ void setup() {
   }
   pinMode(16, OUTPUT);
   digitalWrite(16, 1);
-  setCursor(0,0);
   Serial.println("WiFi connected");
   Serial.println(debug()+"WiFi connected");
-  setCursor(0,1);
+  setCursor(0,0);
   //Serial.println("IP address: ");
-  Serial.print(WiFi.localIP());
+  Serial1.print(WiFi.localIP());
 
   timeClient.begin();
 
@@ -126,8 +147,8 @@ void loop() {
        Serial.println(debug()+" Delays up to date");
      }
      else stopsLastMillis+=10000;//wait for 10s to connect again*/
-     leds_config++;
-     if (leds_config>63) leds_config = 0;
+     //leds_config++;
+     //if (leds_config>63) leds_config = 0;
      //expander.writeRegister(REGISTER_OUTPUT_PORT, leds_config);
      //Serial.println("tick "+leds_config);
      stopsLastMillis+=1000;
@@ -137,9 +158,10 @@ void loop() {
   }
   if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) {
     Serial.println(debug()+" Trying to refresh weather");
-     if (showWeatherline("api.openweathermap.org", 80, "7531002")) { //todo maybe change city?
+     if (showWeatherline("api.openweathermap.org", 80, "7531002")) {
        weatherLastMillis = millis();
-       Serial.println(debug()+" Weather up to date");
+     } else {
+
      }
      weatherLastMillis+=200000; //wait for 200s to connect again
   }
@@ -148,23 +170,27 @@ void loop() {
         int hr = timeClient.getHours();
         int mn = timeClient.getMinutes();
         segment.setDigit(0,0,hr/10,false);
-        segment.setDigit(0,1,hr%10,false);
+        segment.setDigit(0,1,hr%10,true);
         segment.setDigit(0,2,mn/10,false);
         segment.setDigit(0,3,mn%10,false);
-      } else {} // tutaj czerwonym ledem że czas nieaktualny
+        leds_status = LEDS_CONFIG_LEFT_GREEN;
+      } else {
+        leds_status = LEDS_CONFIG_LEFT_RED;
+      } // tutaj czerwonym ledem że czas nieaktualny
+      expander.writeRegister(REGISTER_OUTPUT_PORT, leds_status+vfd_status);
       timeLastMillis+=1000;
+  }
+  if (millis()>ledsLastMillis+LEDSREFRESHMILLIS) {
+      led_strip[0] = CRGB(255,23,23);
+      led_strip[1] = CRGB(255,23,23);
+      led_strip[2] = CRGB(255,23,23);
+      led_strip[3] = CRGB(255,23,23);
+      led_strip[4] = CRGB(255,23,23);
+      led_strip[5] = CRGB(255,23,23);
+      led_strip[6] = CRGB(255,23,23);
+      FastLED.show();
+      ledsLastMillis+=1000;
   }
 
   //rbg
-
-  led_strip[0] = CRGB(255,255,255);
-  led_strip[1] = CRGB(0,0,0);
-  led_strip[2] = CRGB(0,0,255);
-  led_strip[3] = CRGB(0,255,0);
-  led_strip[4] = CRGB(255,0,0);
-  led_strip[5] = CRGB(255,255,0);
-  led_strip[6] = CRGB(255,0,255);
-  FastLED.show();
-  delay(500);
-
 }

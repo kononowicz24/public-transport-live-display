@@ -29,6 +29,16 @@
             "projectEnvName": "nodemcuv2",
             "toolchainBinDir": "C:/Users/k24/.platformio/packages/toolchain-xtensa/bin",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "d:/workspace/k24SW/public-transport-live-display/.pio/build/nodemcuv2/firmware.elf",
+            "projectEnvName": "nodemcuv2",
+            "toolchainBinDir": "C:/Users/k24/.platformio/packages/toolchain-xtensa/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "loadMode": "manual"
         }
     ]
 }
