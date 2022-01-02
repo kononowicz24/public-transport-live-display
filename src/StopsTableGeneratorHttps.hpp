@@ -15,10 +15,10 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
 
     Serial.println(debug("STOPS")+host);
 
-    Serial.println(String(debug("STOPS"))+"Using fingerprint '"+FINGERPRINT_CKAN+"'\n");
+    Serial.println(String(debug("STOPS"))+"Using fingerprint '"+FINGERPRINT_CKAN);
     httpsClient.setFingerprint(FINGERPRINT_CKAN);
     httpsClient.setTimeout(15000); // 15 Seconds
-    delay(1000);
+    //delay(1000);
 
     Serial.println(debug("STOPS")+"HTTPS Connecting");
     int r = 0; //retry counter
@@ -31,6 +31,7 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
     if (r == 30)
     {
         Serial.println(debug("STOPS")+"Connection failed");
+        return false;
     }
     else
     {
@@ -51,15 +52,6 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
 
     Serial.println(debug("STOPS")+"request sent");
 
-   // while (httpsClient.connected())
-   // {
-   //     String line = httpsClient.readStringUntil('\n');
-   //     if (line == "\r")
-   //     {
-   //         Serial.println("headers received");
-   //         break;
-   //     }
-   // }
     unsigned long timeout = millis();
     while (httpsClient.available() == 0) {
       if (millis() - timeout > 5000) {
@@ -71,8 +63,6 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
 
   const size_t bufferSize = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(3) + 5*JSON_OBJECT_SIZE(12) + 1120;
   DynamicJsonBuffer jsonBuffer(bufferSize);
-
-  
 
   while(httpsClient.available()){
       JsonObject& root = jsonBuffer.parseObject(httpsClient);
@@ -88,15 +78,18 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
         if (routeId!=0) {
           clearLine(i);
           setCursor(0,i);
+          Serial.print(debug("STOPS")+(String)routeId);
           Serial1.print((String)routeId);
           delStr = (String)delayInSeconds;
-
           setCursor(4,i);
           String relation1= toCP852(relation);
+          Serial.print(relation1);
           Serial1.print(relation1);
           setCursor(13-delStr.length(),i);
+          Serial.print((String)" "+ delStr+" ");
           Serial1.print((String)" "+ delStr+" ");
           setCursor(15,i);
+          Serial.println((String)estimatedTime);
           Serial1.print((String)estimatedTime);
           printedLines[i] = true;
         }

@@ -3,7 +3,9 @@
 #include <Arduino.h>
 
 String precUptimePrint(long a) {
-  return String(a/1000)+"."+(a%1000);
+  long sec = a/1000;
+  long dec = a%1000;
+  return String(sec)+"."+(dec<100?"0":"")+(dec<10?"0":"")+(dec);
 }
 
 String debug() {

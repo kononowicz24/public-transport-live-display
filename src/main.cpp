@@ -19,6 +19,10 @@
 #include "MAX44009.h"
 #include "FastLED.h"
 
+#include <IRremoteESP8266.h>
+#include <IRrecv.h>
+#include <IRutils.h>
+
 #include "i2cscan.hpp"
 
 const char* ssid     = SSID_k24;
@@ -78,6 +82,12 @@ uint8_t vfd_status = VFD_ON;
 
 uint8_t expander_status = 0x00;
 
+const uint16_t kRecvPin = 0;
+
+IRrecv irrecv(kRecvPin);
+
+decode_results results;
+
 void setup() {
   Serial.begin(115200); //debug one
   Serial1.begin(9600); //this one setups communication with the vfd display
@@ -91,6 +101,8 @@ void setup() {
   expander.begin(Wire, 0x3f);
   expander.writeRegister(REGISTER_CONFIGURATION, 0x40);
   expander.writeRegister(REGISTER_OUTPUT_PORT, leds_status+vfd_status);
+
+  irrecv.enableIRIn();  // Start the receiver
 
   sht.begin(0x44);
   light.begin();
@@ -110,7 +122,7 @@ void setup() {
   segment.setDigit(0,2,8,false);
   segment.setDigit(0,3,8,false);
 
-  Serial.println("Connecting to ");
+  Serial.print(debug("WIFI")+"Connecting to ");
   Serial.println(ssid);
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
@@ -124,8 +136,8 @@ void setup() {
   }
   pinMode(16, OUTPUT);
   digitalWrite(16, 1);
-  Serial.println("WiFi connected");
-  Serial.println(debug()+"WiFi connected");
+  Serial.println(debug("WIFI")+"WiFi connected");
+  //Serial.println(debug()+"WiFi connected");
   setCursor(0,0);
   //Serial.println("IP address: ");
   Serial1.print(WiFi.localIP());
@@ -135,28 +147,19 @@ void setup() {
 }
 
 void loop() {
-  //if (value>0) delay(20000); else delay(3000);//FIXME
-  //++value;
-  //delay(1);
-  //Serial.print(debug()+"connecting to ");
-  //Serial.println(host);
-  if (millis()>stopsLastMillis+STOPSREFRESHMILLIS) {
+  if (millis()>stopsLastMillis+STOPSREFRESHMILLIS) { //refresh stops
     Serial.println(debug()+" Trying to refresh delays");
      if (showStopDelayList("ckan2.multimediagdansk.pl", 443, stopId)) {
        stopsLastMillis = millis();
-       Serial.println(debug()+" Delays up to date");
+       Serial.println(debug("MAIN")+" Delays up to date");
      }
      else stopsLastMillis+=10000;//wait for 10s to connect again*/
-     //leds_config++;
-     //if (leds_config>63) leds_config = 0;
-     //expander.writeRegister(REGISTER_OUTPUT_PORT, leds_config);
-     //Serial.println("tick "+leds_config);
      stopsLastMillis+=1000;
      sht.read(false);
-     Serial.println(debug()+"T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" Light: "+(String)light.get_lux());
+     Serial.println(debug("SENSORS")+"T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" Light: "+(String)light.get_lux());
   }
-  if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) {
-    Serial.println(debug()+" Trying to refresh weather");
+  if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) { //refresh weather
+    Serial.println(debug("MAIN")+" Trying to refresh weather");
      if (showWeatherline("api.openweathermap.org", 80, "7531002")) {
        weatherLastMillis = millis();
      } else {
@@ -164,7 +167,7 @@ void loop() {
      }
      weatherLastMillis+=200000; //wait for 200s to connect again
   }
-  if (millis()>timeLastMillis+TIMEREFRESHMILLIS) {
+  if (millis()>timeLastMillis+TIMEREFRESHMILLIS) { //refresh NTP time
       if (timeClient.update()) {
         int hr = timeClient.getHours();
         int mn = timeClient.getMinutes();
@@ -192,7 +195,7 @@ void loop() {
       expander.writeRegister(REGISTER_OUTPUT_PORT, leds_status+vfd_status);
       timeLastMillis+=1000;
   }
-  if (millis()>ledsLastMillis+LEDSREFRESHMILLIS) {
+  if (millis()>ledsLastMillis+LEDSREFRESHMILLIS) { //refresh LEDs
       led_strip[0] = CRGB(255,23,23);
       led_strip[1] = CRGB(255,23,23);
       led_strip[2] = CRGB(255,23,23);
@@ -203,6 +206,12 @@ void loop() {
       FastLED.show();
       ledsLastMillis+=1000;
   }
-
+  if (irrecv.decode(&results)) {
+    // print() & println() can't handle printing long longs. (uint64_t)
+    Serial.println("");
+    serialPrintUint64(results.value, HEX);
+    Serial.println("");
+    irrecv.resume();  // Receive the next value
+  }
   //rbg
 }
