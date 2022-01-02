@@ -10,6 +10,7 @@
             "includePath": [
                 "d:/workspace/k24SW/public-transport-live-display/include",
                 "d:/workspace/k24SW/public-transport-live-display/src",
+                "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
                 "d:/workspace/k24SW/public-transport-live-display/.pio/libdeps/nodemcuv2/NTPClient",
                 "d:/workspace/k24SW/public-transport-live-display/.pio/libdeps/nodemcuv2/FastLED/src",
@@ -32,7 +33,6 @@
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/DNSServer/src",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/EEPROM",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266AVRISP/src",
-                "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPUpdateServer/src",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266LLMNR",
                 "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266NetBIOS",
@@ -67,6 +67,7 @@
                 "path": [
                     "d:/workspace/k24SW/public-transport-live-display/include",
                     "d:/workspace/k24SW/public-transport-live-display/src",
+                    "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
                     "d:/workspace/k24SW/public-transport-live-display/.pio/libdeps/nodemcuv2/NTPClient",
                     "d:/workspace/k24SW/public-transport-live-display/.pio/libdeps/nodemcuv2/FastLED/src",
@@ -89,7 +90,6 @@
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/DNSServer/src",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/EEPROM",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266AVRISP/src",
-                    "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPUpdateServer/src",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266LLMNR",
                     "C:/Users/k24/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266NetBIOS",

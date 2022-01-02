@@ -1,4 +1,4 @@
-#ifndef  _DEBUGINTERF
+#ifndef _DEBUGINTERFACE_H_
 #define _DEBUGINTERFACE_H_
 #include <Arduino.h>
 
@@ -8,6 +8,10 @@ String precUptimePrint(long a) {
 
 String debug() {
   return String("[")+precUptimePrint(millis())+"] : ";
+}
+
+String debug(String key) {
+  return String("[")+precUptimePrint(millis())+"]["+key+"] : ";
 }
 
 #endif
