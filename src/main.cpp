@@ -69,6 +69,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 #define VFD_ON_MASK 0x80
 #define VFD_OFF_MASK 0x00
 #define VFD_ON 0x80
+#define VFD_OFF 0x00
 
 uint8_t leds_on_status = 0x38;
 uint8_t leds_status = 0x00;
@@ -153,8 +154,7 @@ void loop() {
      //Serial.println("tick "+leds_config);
      stopsLastMillis+=1000;
      sht.read(false);
-     Serial.println(debug()+"T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" tick: "+ leds_config);
-     Serial.println(debug()+"Light: "+(String)light.get_lux());
+     Serial.println(debug()+"T: "+(String)(sht.getTemperature())+" H: "+sht.getHumidity()+" Light: "+(String)light.get_lux());
   }
   if (millis()>weatherLastMillis+WEATHERREFRESHMILLIS) {
     Serial.println(debug()+" Trying to refresh weather");
@@ -173,7 +173,20 @@ void loop() {
         segment.setDigit(0,1,hr%10,true);
         segment.setDigit(0,2,mn/10,false);
         segment.setDigit(0,3,mn%10,false);
-        leds_status = LEDS_CONFIG_LEFT_GREEN;
+        //segment.setIntensity(0,2);
+        if (light.get_lux()>5) {
+          leds_status = LEDS_CONFIG_LEFT_GREEN;
+          segment.setIntensity(0,15);
+          vfd_status = VFD_ON;
+        } else {
+          leds_status = LEDS_CONFIG_OFF;
+          segment.setIntensity(0,3);
+          if (hr>=23 || hr<6) {
+            vfd_status = VFD_OFF;
+          } else {
+            vfd_status = VFD_ON;
+          }
+        }
       } else {
         leds_status = LEDS_CONFIG_LEFT_RED;
       } // tutaj czerwonym ledem że czas nieaktualny

@@ -77,6 +77,7 @@ boolean showWeatherline(const char* host, int httpPort, String cityId) {
   }
   client.stop();
 
+  clearLine(3);
   clearLine(4);
   setCursor(0,2);
   Serial1.print((String)""+(String)weather.temp_degC+(char)248+"C "+(String)weather.wind_speed+"km/h "+degreesToCardinalDetailed(weather.wind_direction)); // ascii - 248 
