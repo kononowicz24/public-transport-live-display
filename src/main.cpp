@@ -183,7 +183,7 @@ void loop() {
         } else {
           leds_status = LEDS_CONFIG_OFF;
           segment.setIntensity(0,3);
-          if (hr>=23 || hr<6) {
+          if (hr>=23 || hr<7) {
             vfd_status = VFD_OFF;
           } else {
             vfd_status = VFD_ON;

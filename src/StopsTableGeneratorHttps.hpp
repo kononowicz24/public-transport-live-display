@@ -95,7 +95,7 @@ boolean showStopDelayList(const char *host, int httpsPort, String stopId)
         }
       }
   }
-  for (int i=0; i<3; i++) {
+  for (int i=0; i<2; i++) {
     if (!printedLines[i]) clearLine(i);
   }
   httpsClient.stop();
